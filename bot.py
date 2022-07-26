@@ -1,26 +1,27 @@
 import discord
+import games
 import random
 
 TOKEN = 'OTA1MjQ1MDgzNDU1MDkwNjg4.YYHRLg.uIdheDkug0vnar8Fav3FStOgEaM'
-client = discord.Client()
+
+class MyClient(discord.Client):
+    async def on_ready(self):                               #prints a ready message to console
+        print('Logged on as {0}!'.format(self.user))
+
+    def on_message(self, message):                          #chat logging
+        print('{0.author}: {0.content}'.format(message))
+
+    async def on_message(self, message):
+        if message.author == client.user:   #if message is from bot do nothing
+            return
+
+        if message.content.startswith('$test'):
+            await message.channel.send("test worked")
+
+      ## if message.content.startswith('$valorant'):
+      ##      await create_voice_channel(test, 'test')
+      ##     return test
 
 
-@client.event
-async def on_ready():
-    print('Whats up bitches im {0.user}'.format(client))
-
-
-
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-
-    username = str(message.author).split('#')[0]
-    user_message = str(message.content)
-    channel = str(message.channel.name)
-    print(f'{username}: {user_message} ({channel})')
-
-
-
+client = MyClient()
 client.run(TOKEN)
