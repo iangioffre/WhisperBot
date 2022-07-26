@@ -4,4 +4,4 @@
 
 ## Running the bot
 * pip3 install -U discord.py
-* ./run.sh
+* ./run.sh OR python3 bot/bot.py
