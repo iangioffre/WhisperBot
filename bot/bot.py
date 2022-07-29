@@ -1,27 +1,23 @@
 import discord
-import games
+from discord.ext import commands
 import random
 
 TOKEN = 'OTA1MjQ1MDgzNDU1MDkwNjg4.YYHRLg.uIdheDkug0vnar8Fav3FStOgEaM'
 
-class MyClient(discord.Client):
-    async def on_ready(self):                               #prints a ready message to console
-        print('Logged on as {0}!'.format(self.user))
+bot = commands.Bot(command_prefix='$')
 
-    def on_message(self, message):                          #chat logging
-        print('{0.author}: {0.content}'.format(message))
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
+    print('------')
 
-    async def on_message(self, message):
-        if message.author == client.user:   #if message is from bot do nothing
-            return
+@bot.command()
+async def role(ctx):
 
-        if message.content.startswith('$test'):
-            await message.channel.send("test worked")
+    message = await ctx.send("Role Selector")
 
-      ## if message.content.startswith('$valorant'):
-      ##      await create_voice_channel(test, 'test')
-      ##     return test
+    reaction_X = '❌'
 
+    await ctx.add_reaction(reaction_X)
 
-client = MyClient()
-client.run(TOKEN)
+bot.run(TOKEN)
