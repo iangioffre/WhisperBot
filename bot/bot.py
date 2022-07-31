@@ -38,4 +38,16 @@ async def role(ctx, *args):
     for role_reaction in role_map:
         await message.add_reaction(role_reaction[1])
 
+@bot.event
+async def on_raw_reaction_add(payload):
+    """payload: channel_id, emoji, event_type, guild_id, member, message_id, user_id
+    """
+    pass
+
+@bot.event
+async def on_raw_reaction_remove(payload):
+    """payload: channel_id, emoji, event_type, guild_id, member, message_id, user_id
+    """
+    pass
+
 bot.run(TOKEN)
