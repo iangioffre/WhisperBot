@@ -12,12 +12,16 @@ async def on_ready():
     print('------')
 
 @bot.command()
+async def test(ctx):
+    await ctx.send('Message receieved')
+
+@bot.command()
 async def role(ctx):
 
     message = await ctx.send("Role Selector")
 
     reaction_X = '❌'
 
-    await ctx.add_reaction(reaction_X)
+    await message.add_reaction(reaction_X)
 
 bot.run(TOKEN)
