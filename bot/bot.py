@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-import random
 
 TOKEN = 'OTA1MjQ1MDgzNDU1MDkwNjg4.YYHRLg.uIdheDkug0vnar8Fav3FStOgEaM'
 
@@ -16,12 +15,27 @@ async def test(ctx):
     await ctx.send('Message receieved')
 
 @bot.command()
-async def role(ctx):
+async def role(ctx, *args):
+    """Create a message and add reactions to the message
+    Format: $role [role1] [reaction1] [role2] [reaction2] ...
+    """
+    role_map = []
 
-    message = await ctx.send("Role Selector")
+    # get message args into array of tuples
+    for i in range(0, len(args), 2):
+        role_map.append((args[i], args[i + 1]))
 
-    reaction_X = '❌'
+    message_text = ''
+    is_first = True
+    for role_reaction in role_map:
+        if not is_first:
+            message_text += '\n'
+        is_first = False
+        message_text += role_reaction[0] + ' - ' + role_reaction[1]
 
-    await message.add_reaction(reaction_X)
+    message = await ctx.send(message_text)
+
+    for role_reaction in role_map:
+        await message.add_reaction(role_reaction[1])
 
 bot.run(TOKEN)
