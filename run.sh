@@ -1,2 +1,2 @@
 #!/bin/bash
-nodemon --exec python3 bot/bot.py
+nodemon --watch bot --exec python3 bot/bot.py
