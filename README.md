@@ -4,4 +4,9 @@
 
 ## Running the bot
 * pip3 install -U discord.py
-* ./run.sh OR python3 bot/bot.py
+* python3 bot/bot.py
+
+## Running the bot with watch changes (requires node and npm)
+* pip3 install -U discord.py
+* npm install
+* ./run.sh
