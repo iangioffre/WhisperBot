@@ -1,5 +1,7 @@
 import discord
 from discord.ext import commands
+from discord.utils import get
+
 import json
 import os
 
@@ -58,8 +60,8 @@ async def role(ctx, *args):
             g_reactions[message.guild.id] = {}
         if g_reactions[message.guild.id].get(message.id) is None:
             g_reactions[message.guild.id][message.id] = {}
-        if g_reactions[message.guild.id][message.id].get(role_reaction[0]) is None:
-            g_reactions[message.guild.id][message.id][role_reaction[0]] = role_reaction[1]
+        if g_reactions[message.guild.id][message.id].get(role_reaction[1]) is None:
+            g_reactions[message.guild.id][message.id][role_reaction[1]] = role_reaction[0]
     
     # write g_reactions changes to file
     with open(reactions_file_name, 'w') as f_reactions:
@@ -69,13 +71,54 @@ async def role(ctx, *args):
 async def on_raw_reaction_add(payload):
     """payload: channel_id, emoji, event_type, guild_id, member, message_id, user_id
     """
-    pass
+    guild_id = str(payload.guild_id)
+    message_id = str(payload.message_id)
+    reaction = str(payload.emoji.name)
+    member = payload.member
+    
+    if g_reactions.get(guild_id) is None:
+        return
+    if g_reactions[guild_id].get(message_id) is None:
+        return 
+    if g_reactions[guild_id][message_id].get(reaction) is None:
+        return 
+
+    role = g_reactions[guild_id][message_id][reaction]
+    try:
+        await member.add_roles(discord.utils.get(member.guild.roles, name=role))
+    except Exception as e:
+        print(e)
+        print('bot.py: error giving role to member')
+    else:
+        print('role added')
 
 @bot.event
 async def on_raw_reaction_remove(payload):
     """payload: channel_id, emoji, event_type, guild_id, member, message_id, user_id
     """
-    pass
+    guild_id = str(payload.guild_id)
+    user_id = payload.user_id
+    message_id = str(payload.message_id)
+    reaction = str(payload.emoji.name)
+    # member = bot.get_guild(guild_id).get_member(user_id)
+    print(bot.get_guild(guild_id))
+    print(bot.get_user(user_id))
+    
+    if g_reactions.get(guild_id) is None:
+        return
+    if g_reactions[guild_id].get(message_id) is None:
+        return 
+    if g_reactions[guild_id][message_id].get(reaction) is None:
+        return 
+
+    role = g_reactions[guild_id][message_id][reaction]
+    try:
+        await member.remove_roles(discord.utils.get(member.guild.roles, name=role))
+    except Exception as e:
+        print(e)
+        print('bot.py: error removing role from member')
+    else:
+        print('role removed')
 
 async def import_reactions():
     global g_reactions
