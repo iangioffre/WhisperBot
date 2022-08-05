@@ -97,12 +97,13 @@ async def on_raw_reaction_remove(payload):
     """payload: channel_id, emoji, event_type, guild_id, member, message_id, user_id
     """
     guild_id = str(payload.guild_id)
-    user_id = payload.user_id
+    guild_id_int = payload.guild_id
+    user_id = int(payload.user_id)
     message_id = str(payload.message_id)
     reaction = str(payload.emoji.name)
     # member = bot.get_guild(guild_id).get_member(user_id)
-    print(bot.get_guild(guild_id))
-    print(bot.get_user(user_id))
+    guild = bot.get_guild(guild_id_int)
+    print(guild.get_member(user_id))
     
     if g_reactions.get(guild_id) is None:
         return
