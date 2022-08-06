@@ -4,10 +4,15 @@ from discord.utils import get
 
 import json
 import os
+from dotenv import load_dotenv
 
-TOKEN = 'OTA1MjQ1MDgzNDU1MDkwNjg4.YYHRLg.uIdheDkug0vnar8Fav3FStOgEaM'
+load_dotenv()
 
-bot = commands.Bot(command_prefix='$')
+TOKEN = os.getenv('BOT_TOKEN')
+
+intents = discord.Intents.default()  # Allow the use of custom intents
+intents.members = True
+bot = commands.Bot(command_prefix='$', intents=intents)
 
 g_reactions = {}
 files_path = 'files/'
@@ -84,26 +89,24 @@ async def on_raw_reaction_add(payload):
         return 
 
     role = g_reactions[guild_id][message_id][reaction]
+
     try:
         await member.add_roles(discord.utils.get(member.guild.roles, name=role))
     except Exception as e:
         print(e)
         print('bot.py: error giving role to member')
     else:
-        print('role added')
+        pass # print('role added')
 
 @bot.event
 async def on_raw_reaction_remove(payload):
     """payload: channel_id, emoji, event_type, guild_id, member, message_id, user_id
     """
     guild_id = str(payload.guild_id)
-    guild_id_int = payload.guild_id
-    user_id = int(payload.user_id)
     message_id = str(payload.message_id)
     reaction = str(payload.emoji.name)
-    # member = bot.get_guild(guild_id).get_member(user_id)
-    guild = bot.get_guild(guild_id_int)
-    print(guild.get_member(user_id))
+    guild = bot.get_guild(payload.guild_id)
+    member = guild.get_member(payload.user_id)
     
     if g_reactions.get(guild_id) is None:
         return
@@ -113,13 +116,14 @@ async def on_raw_reaction_remove(payload):
         return 
 
     role = g_reactions[guild_id][message_id][reaction]
+
     try:
         await member.remove_roles(discord.utils.get(member.guild.roles, name=role))
     except Exception as e:
         print(e)
         print('bot.py: error removing role from member')
     else:
-        print('role removed')
+        pass # print('role removed')
 
 async def import_reactions():
     global g_reactions
