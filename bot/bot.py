@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 #            COMMANDS (*admin)            #
 ###########################################
 # *test - sends message back to say it's working
-# *reactions - prints reaction object
+# *roles - prints reaction object
 # *clear_roles - clears all role-reaction relationships
 # *create_role - creates a message with role-reaction inputs
 # *edit_role - edits a given message with role-reaction inputs
@@ -43,7 +43,7 @@ async def test(ctx):
 
 @commands.has_permissions(administrator=True)
 @bot.command()
-async def reactions(ctx):
+async def roles(ctx):
     print(g_reactions)
     await ctx.send(g_reactions)
 
