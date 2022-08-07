@@ -6,37 +6,59 @@ import json
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+###########################################
+#            COMMANDS (*admin)            #
+###########################################
+# *test - sends message back to say it's working
+# *reactions - prints reaction object
+# *clear_roles - clears all role-reaction relationships
+# *create_role - creates a message with role-reaction inputs
+# *edit_role - edits a given message with role-reaction inputs
 
+load_dotenv()
 TOKEN = os.getenv('BOT_TOKEN')
 
 intents = discord.Intents.default()  # Allow the use of custom intents
 intents.members = True
+# intents.messages = True
+# intents.reactions = True
+
+####################
+#      GLOBAL      #
+####################
 bot = commands.Bot(command_prefix='$', intents=intents)
 
 g_reactions = {}
 files_path = 'files/'
 reactions_file_name = files_path + 'reactions.json'
 
-@bot.event
-async def on_ready():
-    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
-    print('------')
-    await import_reactions()
-    print('Reactions imported')
-    print(g_reactions)
+####################
+#     COMMANDS     #
+####################
 
+@commands.has_permissions(administrator=True)
 @bot.command()
 async def test(ctx):
     await ctx.send('Message receieved')
 
+@commands.has_permissions(administrator=True)
 @bot.command()
 async def reactions(ctx):
     print(g_reactions)
     await ctx.send(g_reactions)
 
+@commands.has_permissions(administrator=True)
 @bot.command()
-async def role(ctx, *args):
+async def clear_roles(ctx):
+    print("Clearing all roles")
+    g_reactions = {}
+    with open(reactions_file_name, 'w') as f_reactions:
+        json.dump(g_reactions, f_reactions)
+    await ctx.send("All roles cleared")
+
+@commands.has_permissions(administrator=True)
+@bot.command()
+async def create_role(ctx, *args):
     """Create a message and add reactions to the message
     Format: $role [role1] [reaction1] [role2] [reaction2] ...
     """
@@ -58,19 +80,86 @@ async def role(ctx, *args):
     """message:
     id, channel(id, name, position, nsfw, news, category_id), type, author(id, name, discriminator, bot, nick, guild(id, name, shard_id, chunked, member_count)), flags
     """
+    guild_id = str(message.guild.id)
+    message_id = str(message.id)
+
+    if g_reactions.get(guild_id) is None:
+        g_reactions[guild_id] = {}
+    if g_reactions[guild_id].get(message_id) is None:
+        g_reactions[guild_id][message_id] = {}
 
     for role_reaction in role_map:
         await message.add_reaction(role_reaction[1])
-        if g_reactions.get(message.guild.id) is None:
-            g_reactions[message.guild.id] = {}
-        if g_reactions[message.guild.id].get(message.id) is None:
-            g_reactions[message.guild.id][message.id] = {}
-        if g_reactions[message.guild.id][message.id].get(role_reaction[1]) is None:
-            g_reactions[message.guild.id][message.id][role_reaction[1]] = role_reaction[0]
+        if g_reactions[guild_id][message_id].get(role_reaction[1]) is None:
+            g_reactions[guild_id][message_id][role_reaction[1]] = role_reaction[0]
     
     # write g_reactions changes to file
     with open(reactions_file_name, 'w') as f_reactions:
         json.dump(g_reactions, f_reactions)
+
+    # remove command message
+    await ctx.message.delete()
+
+@commands.has_permissions(administrator=True)
+@bot.command()
+async def edit_role(ctx, *args):
+    """Edit a message to include the new reactions given
+    Format: $role [role1] [reaction1] [role2] [reaction2] ...
+    """
+    role_map = []
+    message_id = args[0]
+
+    # get message args into array of tuples
+    for i in range(1, len(args), 2):
+        role_map.append((args[i], args[i + 1]))
+
+    message_text = ''
+    is_first = True
+    for role_reaction in role_map:
+        if not is_first:
+            message_text += '\n'
+        is_first = False
+        message_text += role_reaction[0] + ' - ' + role_reaction[1]
+
+    message = await ctx.fetch_message(message_id)
+    await message.edit(content=message_text)
+    """message:
+    id, channel(id, name, position, nsfw, news, category_id), type, author(id, name, discriminator, bot, nick, guild(id, name, shard_id, chunked, member_count)), flags
+    """
+    guild_id = str(message.guild.id)
+    message_id = str(message.id)
+
+    if g_reactions.get(guild_id) is None:
+        g_reactions[guild_id] = {}
+    g_reactions[guild_id][message_id] = {}
+
+    await message.clear_reactions()
+    # for reaction in message.reactions:
+    #     await message.clear_reaction(reaction)
+
+    for role_reaction in role_map:
+        await message.add_reaction(role_reaction[1])
+        if g_reactions[guild_id][message_id].get(role_reaction[1]) is None:
+            g_reactions[guild_id][message_id][role_reaction[1]] = role_reaction[0]
+    
+    # write g_reactions changes to file
+    with open(reactions_file_name, 'w') as f_reactions:
+        json.dump(g_reactions, f_reactions)
+
+    # remove command message
+    await ctx.message.delete()
+
+####################
+#      EVENTS      #
+####################
+
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
+    print('------')
+    await import_reactions()
+    print('Reactions imported')
+    print(g_reactions)
 
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -124,6 +213,10 @@ async def on_raw_reaction_remove(payload):
         print('bot.py: error removing role from member')
     else:
         pass # print('role removed')
+
+####################
+# HELPER FUNCTIONS #
+####################
 
 async def import_reactions():
     global g_reactions
