@@ -50,10 +50,10 @@ async def reactions(ctx):
 @commands.has_permissions(administrator=True)
 @bot.command()
 async def clear_roles(ctx):
+    global g_reactions
     print("Clearing all roles")
     g_reactions = {}
-    with open(reactions_file_name, 'w') as f_reactions:
-        json.dump(g_reactions, f_reactions)
+    write_reactions_to_file()
     await ctx.send("All roles cleared")
 
 @commands.has_permissions(administrator=True)
@@ -93,9 +93,7 @@ async def create_role(ctx, *args):
         if g_reactions[guild_id][message_id].get(role_reaction[1]) is None:
             g_reactions[guild_id][message_id][role_reaction[1]] = role_reaction[0]
     
-    # write g_reactions changes to file
-    with open(reactions_file_name, 'w') as f_reactions:
-        json.dump(g_reactions, f_reactions)
+    write_reactions_to_file()
 
     # remove command message
     await ctx.message.delete()
@@ -142,9 +140,7 @@ async def edit_role(ctx, *args):
         if g_reactions[guild_id][message_id].get(role_reaction[1]) is None:
             g_reactions[guild_id][message_id][role_reaction[1]] = role_reaction[0]
     
-    # write g_reactions changes to file
-    with open(reactions_file_name, 'w') as f_reactions:
-        json.dump(g_reactions, f_reactions)
+    write_reactions_to_file()
 
     # remove command message
     await ctx.message.delete()
@@ -219,6 +215,9 @@ async def on_raw_reaction_remove(payload):
 ####################
 
 async def import_reactions():
+    """Imports reactions from json file
+    reactions_file_name
+    """
     global g_reactions
     try:
         os.makedirs(files_path, exist_ok=True)
@@ -232,5 +231,9 @@ async def import_reactions():
             print('Reactions file empty, malformed, or failed to open.')
             g_reactions = {}
     return g_reactions
+
+def write_reactions_to_file():
+    with open(reactions_file_name, 'w') as f_reactions:
+        json.dump(g_reactions, f_reactions)
 
 bot.run(TOKEN)
