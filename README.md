@@ -10,6 +10,10 @@
 * put `BOT_TOKEN="<your token>"` into `.env`
 
 ## Running the bot (requires python3 and pip3)
+* Run the prod.bat script
+
+OR
+
 * pip install -r requirements.txt
 * python bot/bot.py
 
