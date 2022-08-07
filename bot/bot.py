@@ -74,6 +74,8 @@ async def create_role(ctx, *args):
         if not is_first:
             message_text += '\n'
         is_first = False
+        # if not discord.utils.get(ctx.guild.roles, name=role_reaction[0]):
+        #     await ctx.guild.create_role(name=role_reaction[0])
         message_text += role_reaction[0] + ' - ' + role_reaction[1]
 
     message = await ctx.send(message_text)
@@ -117,6 +119,8 @@ async def edit_role(ctx, *args):
         if not is_first:
             message_text += '\n'
         is_first = False
+        # if not discord.utils.get(ctx.guild.roles, name=role_reaction[0]):
+        #     await ctx.guild.create_role(name=role_reaction[0])
         message_text += role_reaction[0] + ' - ' + role_reaction[1]
 
     message = await ctx.fetch_message(message_id)
