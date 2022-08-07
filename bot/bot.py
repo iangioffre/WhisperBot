@@ -4,6 +4,7 @@ from discord.utils import get
 
 import json
 import os
+import re
 from dotenv import load_dotenv
 
 ###########################################
@@ -166,6 +167,8 @@ async def on_raw_reaction_add(payload):
     guild_id = str(payload.guild_id)
     message_id = str(payload.message_id)
     reaction = str(payload.emoji.name)
+    reaction_key = reaction
+    pattern = re.compile(':(.*):')
     member = payload.member
     
     if member.bot:
@@ -175,9 +178,14 @@ async def on_raw_reaction_add(payload):
     if g_reactions[guild_id].get(message_id) is None:
         return 
     if g_reactions[guild_id][message_id].get(reaction) is None:
-        return 
+        for key in g_reactions[guild_id][message_id].keys():
+            if pattern.search(key):
+                reaction_key = key
+                break
+        else:
+            return 
 
-    role = g_reactions[guild_id][message_id][reaction]
+    role = g_reactions[guild_id][message_id][reaction_key]
 
     try:
         await member.add_roles(discord.utils.get(member.guild.roles, name=role))
@@ -194,6 +202,8 @@ async def on_raw_reaction_remove(payload):
     guild_id = str(payload.guild_id)
     message_id = str(payload.message_id)
     reaction = str(payload.emoji.name)
+    reaction_key = reaction
+    pattern = re.compile(':(.*):')
     guild = bot.get_guild(payload.guild_id)
     member = guild.get_member(payload.user_id)
     
@@ -204,9 +214,14 @@ async def on_raw_reaction_remove(payload):
     if g_reactions[guild_id].get(message_id) is None:
         return 
     if g_reactions[guild_id][message_id].get(reaction) is None:
-        return 
+        for key in g_reactions[guild_id][message_id].keys():
+            if pattern.search(key):
+                reaction_key = key
+                break
+        else:
+            return
 
-    role = g_reactions[guild_id][message_id][reaction]
+    role = g_reactions[guild_id][message_id][reaction_key]
 
     try:
         await member.remove_roles(discord.utils.get(member.guild.roles, name=role))
