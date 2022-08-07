@@ -132,8 +132,6 @@ async def edit_role(ctx, *args):
     g_reactions[guild_id][message_id] = {}
 
     await message.clear_reactions()
-    # for reaction in message.reactions:
-    #     await message.clear_reaction(reaction)
 
     for role_reaction in role_map:
         await message.add_reaction(role_reaction[1])
@@ -166,6 +164,8 @@ async def on_raw_reaction_add(payload):
     reaction = str(payload.emoji.name)
     member = payload.member
     
+    if member.bot:
+        return
     if g_reactions.get(guild_id) is None:
         return
     if g_reactions[guild_id].get(message_id) is None:
@@ -193,6 +193,8 @@ async def on_raw_reaction_remove(payload):
     guild = bot.get_guild(payload.guild_id)
     member = guild.get_member(payload.user_id)
     
+    if member.bot:
+        return
     if g_reactions.get(guild_id) is None:
         return
     if g_reactions[guild_id].get(message_id) is None:
@@ -218,10 +220,8 @@ async def on_raw_message_delete(payload):
     message_id = str(payload.message_id)
     
     if g_reactions.get(guild_id) is None:
-        print("GUILD NOT HERE")
         return
     if g_reactions[guild_id].get(message_id) is None:
-        print("MESSAGE NOT HERE")
         return
 
     del g_reactions[guild_id][message_id]

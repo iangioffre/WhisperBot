@@ -2,9 +2,13 @@
 
 [![License](https://img.shields.io/npm/l/express.svg)](https://github.com/CalvinKotval/dc_roleselector/blob/master/LICENSE)
 
+## Functionality
+* Create messages and assign roles based on user reactions to message
+
 ## Setting up the bot
 * add `.env` to root directory 
 * put `BOT_TOKEN="<your token>"` into `.env`
+
 ## Running the bot (requires python3 and pip3)
 * pip install -r requirements.txt
 * python bot/bot.py
