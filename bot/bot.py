@@ -210,6 +210,26 @@ async def on_raw_reaction_remove(payload):
     else:
         pass # print('role removed')
 
+@bot.event
+async def on_raw_message_delete(payload):
+    """payload: cached_message, channel_id, guild_id, message_id
+    """
+    guild_id = str(payload.guild_id)
+    message_id = str(payload.message_id)
+    
+    if g_reactions.get(guild_id) is None:
+        print("GUILD NOT HERE")
+        return
+    if g_reactions[guild_id].get(message_id) is None:
+        print("MESSAGE NOT HERE")
+        return
+
+    del g_reactions[guild_id][message_id]
+    if len(g_reactions[guild_id]) == 0:
+        del g_reactions[guild_id]
+    write_reactions_to_file()
+    
+
 ####################
 # HELPER FUNCTIONS #
 ####################
