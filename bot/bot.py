@@ -61,7 +61,7 @@ async def clear_roles(ctx):
 @bot.command()
 async def create_role(ctx, *args):
     """Create a message and add reactions to the message
-    Format: $role [optional:channel_id] [role1] [reaction1] [role2] [reaction2] ...
+    Format: $create_role [optional:channel_id] [role1] [reaction1] [role2] [reaction2] ...
     """
     role_map = []
     send_message_context = ctx
@@ -114,7 +114,7 @@ async def create_role(ctx, *args):
 @bot.command()
 async def edit_role(ctx, *args):
     """Edit a message to include the new reactions given
-    Format: $role [optional:channel_id] [role1] [reaction1] [role2] [reaction2] ...
+    Format: $edit_role [message_id] [optional:channel_id] [role1] [reaction1] [role2] [reaction2] ...
     """
     role_map = []
     message_id = args[0]
