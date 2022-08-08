@@ -61,12 +61,18 @@ async def clear_roles(ctx):
 @bot.command()
 async def create_role(ctx, *args):
     """Create a message and add reactions to the message
-    Format: $role [role1] [reaction1] [role2] [reaction2] ...
+    Format: $role [optional:channel_id] [role1] [reaction1] [role2] [reaction2] ...
     """
     role_map = []
+    send_message_context = ctx
+
+    start = 0
+    if args[0].isnumeric(): # channel_id to send message in
+        start = 1
+        send_message_context = ctx.guild.get_channel(int(args[0]))
 
     # get message args into array of tuples
-    for i in range(0, len(args), 2):
+    for i in range(start, len(args), 2):
         role_map.append((args[i], args[i + 1]))
 
     message_text = ''
@@ -79,7 +85,7 @@ async def create_role(ctx, *args):
         #     await ctx.guild.create_role(name=role_reaction[0])
         message_text += role_reaction[0] + ' - ' + role_reaction[1]
 
-    message = await ctx.send(message_text)
+    message = await send_message_context.send(message_text)
     """message:
     id, channel(id, name, position, nsfw, news, category_id), type, author(id, name, discriminator, bot, nick, guild(id, name, shard_id, chunked, member_count)), flags
     """
@@ -98,20 +104,29 @@ async def create_role(ctx, *args):
     
     write_reactions_to_file()
 
-    # remove command message
-    await ctx.message.delete()
+    # remove command message if it's in the same channel
+    if not args[0].isnumeric(): # channel_id to send message in
+        await ctx.message.delete()
+    else: # give checkmark reaction to command
+        await ctx.message.add_reaction('✅')
 
 @commands.has_permissions(administrator=True)
 @bot.command()
 async def edit_role(ctx, *args):
     """Edit a message to include the new reactions given
-    Format: $role [role1] [reaction1] [role2] [reaction2] ...
+    Format: $role [optional:channel_id] [role1] [reaction1] [role2] [reaction2] ...
     """
     role_map = []
     message_id = args[0]
+    send_message_context = ctx
+
+    start = 1
+    if args[1].isnumeric(): # channel_id to send message in
+        start = 2
+        send_message_context = ctx.guild.get_channel(int(args[1]))
 
     # get message args into array of tuples
-    for i in range(1, len(args), 2):
+    for i in range(start, len(args), 2):
         role_map.append((args[i], args[i + 1]))
 
     message_text = ''
@@ -124,7 +139,7 @@ async def edit_role(ctx, *args):
         #     await ctx.guild.create_role(name=role_reaction[0])
         message_text += role_reaction[0] + ' - ' + role_reaction[1]
 
-    message = await ctx.fetch_message(message_id)
+    message = await send_message_context.fetch_message(message_id)
     await message.edit(content=message_text)
     """message:
     id, channel(id, name, position, nsfw, news, category_id), type, author(id, name, discriminator, bot, nick, guild(id, name, shard_id, chunked, member_count)), flags
@@ -145,8 +160,11 @@ async def edit_role(ctx, *args):
     
     write_reactions_to_file()
 
-    # remove command message
-    await ctx.message.delete()
+    # remove command message if it's in the same channel
+    if not args[1].isnumeric(): # channel_id to send message in
+        await ctx.message.delete()
+    else: # give checkmark reaction to command
+        await ctx.message.add_reaction('✅')
 
 ####################
 #      EVENTS      #
