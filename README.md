@@ -1,7 +1,7 @@
 # WhisperBot for Discord
 
 [![License](https://img.shields.io/npm/l/express.svg)](https://github.com/CalvinKotval/dc_roleselector/blob/master/LICENSE)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg?style=flat&logo=paypal)](https://www.paypal.com/donate/?hosted_button_id=DWE75T4V4FTV6&item_name=WhisperBot)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg?style=flat&logo=paypal)](https://www.paypal.com/donate/?hosted_button_id=TYXMT8NWGKPV2&item_name=WhisperBot)
 
 
 ## Functionality
