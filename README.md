@@ -8,18 +8,14 @@
 * Create messages and assign roles based on user reactions to message
 
 ## Commands
-* $test - sends message back to say it's working
-  * inputs: None
-* $roles - prints reaction object
-  * inputs: None
-* $clear_roles - clears all role-reaction relationships
-  * inputs: None
-* $create_role - creates a message with role-reaction inputs
-  * inputs: [optional:channel id] [role1] [reaction1] [role2] [reaction2] ...
-* $edit_role - edits a given message with role-reaction inputs
-  * inputs: [message id] [optional:channel id] [role1] [reaction1] [role2] [reaction2] ...
-* $add_role - adds to given message with role-reaction inputs
-  * inputs: [message id] [optional:channel id] [role1] [reaction1] [role2] [reaction2] ...
+* /ping - sends message back to say it's working
+* /roles - prints reaction object
+* /clear_roles - clears all role-reaction relationships
+* /create_role - creates a message with role-reaction inputs
+* /edit_role - edits a given message with role-reaction inputs
+* /add_role - adds to given message with role-reaction inputs  
+
+Format for roles input: "role1, reaction1, role2, reaction2, ..."
 
 ## Setting up the bot
 * add `.env` to root directory 
