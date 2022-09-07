@@ -1,80 +1,89 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
 from discord.utils import get
 
 import json
 import os
 import re
 from dotenv import load_dotenv
+from typing import Optional
+
+class Bot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.default()
+        intents.messages = True
+        intents.members = True
+        super().__init__(command_prefix = '$', intents = intents)
+
+    async def setup_hook(self):
+        await self.tree.sync() # global sync, for guild specific sync (faster), add parameter guild = discord.Object(id = [GUILD_ID])
+        print(f"Synced slash commands for {self.user}.")
+
+    async def on_command_error(self, ctx, error):
+        print(error)
+        await ctx.reply(error, ephemeral = True)
+
+####################
+#      GLOBAL      #
+####################
+bot = Bot()
+
+g_reactions = {}
+files_path = 'files/'
+reactions_file_name = files_path + 'reactions.json'
 
 ###########################################
 #            COMMANDS (*admin)            #
 ###########################################
-# *test - sends message back to say it's working
+# *ping - sends message back to say it's working
 # *roles - prints reaction object
 # *clear_roles - clears all role-reaction relationships
 # *create_role - creates a message with role-reaction inputs
 # *edit_role - edits a given message with role-reaction inputs
 # *add_role - adds to given message with role-reaction inputs
 
-load_dotenv()
-TOKEN = os.getenv('BOT_TOKEN')
-
-intents = discord.Intents.default()  # Allow the use of custom intents
-intents.members = True
-# intents.messages = True
-# intents.reactions = True
-
-####################
-#      GLOBAL      #
-####################
-bot = commands.Bot(command_prefix='$', intents=intents)
-
-g_reactions = {}
-files_path = 'files/'
-reactions_file_name = files_path + 'reactions.json'
-
-####################
-#     COMMANDS     #
-####################
+@commands.has_permissions(administrator = True)
+@bot.hybrid_command(name = 'ping', with_app_command = True, description = "For testing bot's connection")
+async def ping(ctx: commands.Context):
+    await ctx.defer(ephemeral = True)
+    await ctx.reply("Pong!")
 
 @commands.has_permissions(administrator=True)
-@bot.command()
-async def test(ctx):
-    await ctx.send('Message receieved')
-
-@commands.has_permissions(administrator=True)
-@bot.command()
+@bot.hybrid_command(name = 'roles', with_app_command = True, description = "Shows the reaction object")
 async def roles(ctx):
+    await ctx.defer(ephemeral = True)
     print(g_reactions)
-    await ctx.send(g_reactions)
+    await ctx.reply(g_reactions)
 
 @commands.has_permissions(administrator=True)
-@bot.command()
+@bot.hybrid_command(name = 'clear_roles', with_app_command = True, description = "Clears all role-reaction relationships")
 async def clear_roles(ctx):
     global g_reactions
+    await ctx.defer(ephemeral = True)
     print("Clearing all roles")
     g_reactions = {}
     write_reactions_to_file()
-    await ctx.send("All roles cleared")
+    await ctx.reply("All roles cleared")
 
 @commands.has_permissions(administrator=True)
-@bot.command()
-async def create_role(ctx, *args):
+@bot.hybrid_command(name = 'create_role', with_app_command = True, description = "Creates a message with role-reaction inputs")
+async def create_role(ctx, roles, channel: Optional[discord.TextChannel] = None):
     """Create a message and add reactions to the message
     Format: $create_role [optional:channel_id] [role1] [reaction1] [role2] [reaction2] ...
     """
-    role_map = []
-    send_message_context = ctx
+    await ctx.defer(ephemeral = True)
 
-    start = 0
-    if args[0].isnumeric(): # channel_id to send message in
-        start = 1
-        send_message_context = ctx.guild.get_channel(int(args[0]))
+    role_map = []
+    send_message_context = ctx.channel
+
+    if channel is not None: # channel_id to send message in
+        send_message_context = channel
 
     # get message args into array of tuples
-    for i in range(start, len(args), 2):
-        role_map.append((args[i], args[i + 1]))
+    roles = roles.split(",")
+    for i in range(0, len(roles), 2):
+        role_map.append((roles[i].strip(), roles[i + 1].strip()))
 
     message_text = ''
     is_first = True
@@ -105,30 +114,24 @@ async def create_role(ctx, *args):
     
     write_reactions_to_file()
 
-    # remove command message if it's in the same channel
-    if not args[0].isnumeric(): # channel_id to send message in
-        await ctx.message.delete()
-    else: # give checkmark reaction to command
-        await ctx.message.add_reaction('✅')
+    await ctx.reply("Message created")
 
 @commands.has_permissions(administrator=True)
-@bot.command()
-async def edit_role(ctx, *args):
+@bot.hybrid_command(name = 'edit_role', with_app_command = True, description = "Edits a given message with role-reaction inputs")
+async def edit_role(ctx, message_id, roles, channel: Optional[discord.TextChannel] = None):
     """Edit a message to include the new reactions given
     Format: $edit_role [message_id] [optional:channel_id] [role1] [reaction1] [role2] [reaction2] ...
     """
     role_map = []
-    message_id = args[0]
-    send_message_context = ctx
+    send_message_context = ctx.channel
 
-    start = 1
-    if args[1].isnumeric(): # channel_id to send message in
-        start = 2
-        send_message_context = ctx.guild.get_channel(int(args[1]))
+    if channel is not None: # channel_id to edit message in
+        send_message_context = channel
 
     # get message args into array of tuples
-    for i in range(start, len(args), 2):
-        role_map.append((args[i], args[i + 1]))
+    roles = roles.split(",")
+    for i in range(0, len(roles), 2):
+        role_map.append((roles[i].strip(), roles[i + 1].strip()))
 
     message_text = ''
     is_first = True
@@ -161,30 +164,24 @@ async def edit_role(ctx, *args):
     
     write_reactions_to_file()
 
-    # remove command message if it's in the same channel
-    if not args[1].isnumeric(): # channel_id to send message in
-        await ctx.message.delete()
-    else: # give checkmark reaction to command
-        await ctx.message.add_reaction('✅')
+    await ctx.reply("Message edited")
 
 @commands.has_permissions(administrator=True)
-@bot.command()
-async def add_role(ctx, *args):
+@bot.hybrid_command(name = 'add_role', with_app_command = True, description = "Adds to a given message with role-reaction inputs")
+async def add_role(ctx, message_id, roles, channel: Optional[discord.TextChannel]):
     """Edit a message to include the new reactions given
     Format: $add_role [message_id] [optional:channel_id] [role1] [reaction1] [role2] [reaction2] ...
     """
     role_map = []
-    message_id = args[0]
-    send_message_context = ctx
+    send_message_context = ctx.channel
 
-    start = 1
-    if args[1].isnumeric(): # channel_id to send message in
-        start = 2
-        send_message_context = ctx.guild.get_channel(int(args[1]))
+    if channel is not None: # channel_id to edit message in
+        send_message_context = channel
 
     # get message args into array of tuples
-    for i in range(start, len(args), 2):
-        role_map.append((args[i], args[i + 1]))
+    roles = roles.split(",")
+    for i in range(0, len(roles), 2):
+        role_map.append((roles[i].strip(), roles[i + 1].strip()))
 
     message_text = ''
     for role_reaction in role_map:
@@ -213,11 +210,7 @@ async def add_role(ctx, *args):
     
     write_reactions_to_file()
 
-    # remove command message if it's in the same channel
-    if not args[1].isnumeric(): # channel_id to send message in
-        await ctx.message.delete()
-    else: # give checkmark reaction to command
-        await ctx.message.add_reaction('✅')
+    await ctx.reply("Message edited")
 
 ####################
 #      EVENTS      #
@@ -346,4 +339,6 @@ def write_reactions_to_file():
     with open(reactions_file_name, 'w') as f_reactions:
         json.dump(g_reactions, f_reactions)
 
+load_dotenv()
+TOKEN = os.getenv('BOT_TOKEN')
 bot.run(TOKEN)
