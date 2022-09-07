@@ -15,7 +15,7 @@
 * /edit_role - edits a given message with role-reaction inputs
 * /add_role - adds to given message with role-reaction inputs  
 
-Format for roles input: "role1, reaction1, role2, reaction2, ..."
+Format for roles input: role1, reaction1, role2, reaction2, ...
 
 ## Setting up the bot
 * add `.env` to root directory 
