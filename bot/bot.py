@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 # *clear_roles - clears all role-reaction relationships
 # *create_role - creates a message with role-reaction inputs
 # *edit_role - edits a given message with role-reaction inputs
-# add_role - adds to given message with role-reaction inputs
+# *add_role - adds to given message with role-reaction inputs
 
 load_dotenv()
 TOKEN = os.getenv('BOT_TOKEN')
