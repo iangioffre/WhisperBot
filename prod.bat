@@ -1,3 +1,3 @@
 @echo off
-pip install -r requirements.txt
-python bot/bot.py
+call pip install -r requirements.txt
+call python bot/bot.py
