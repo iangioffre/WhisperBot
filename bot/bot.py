@@ -342,6 +342,7 @@ def write_reactions_to_file():
 
 load_dotenv()
 TOKEN = os.getenv('BOT_TOKEN')
-if TOKEN is None:
+if TOKEN == '':
     print('You must pass have BOT_TOKEN defined in the environment.')
+    exit()
 bot.run(TOKEN)
