@@ -32,3 +32,20 @@ Format for roles input: role1, reaction1, role2, reaction2, ...
 * Windows: .\dev.bat
   * pip install -r requirements.txt
   * npm install (may have to run `npm install -g nodemon` manually)
+
+## Running the bot using Docker Compose
+* `git clone https://github.com/iangioffre/WhisperBot.git`
+* `docker build -t whisper-bot WhisperBot`
+```yaml
+version: "3.9"
+services:
+  # WhisperBot - Discord bot to run WhisperBot
+  whisper-bot:
+    container_name: whisper-bot
+    image: whisper-bot
+    environment:
+      BOT_TOKEN: $DISCORD_BOT_TOKEN
+    restart: unless-stopped
+    volumes: 
+      - path/to/folder/containing/json:/usr/src/app/files
+```
